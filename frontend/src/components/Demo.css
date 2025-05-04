@@ -1,0 +1,16 @@
+
+
+.login-prompt {
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+}
+
+.login-prompt button {
+    padding: 1rem;
+    color: white;
+    background-color: hsl(203, 100%, 37%);
+}

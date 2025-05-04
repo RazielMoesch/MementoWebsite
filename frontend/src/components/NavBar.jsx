@@ -2,7 +2,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import "./Navbar.css"; // optional, for styles
 
-const NavBar = () => {
+const NavBar = ({ loggedIn, username }) => {
   return (
     <nav className="navbar">
       <div className="navbar-brand">Memento-Vision</div>
@@ -17,11 +17,24 @@ const NavBar = () => {
             Try Now - Demo
           </NavLink>
         </li>
-        <li>
-          <NavLink to="/login" className="nav-link">
-            Login
-          </NavLink>
-        </li>
+
+        {loggedIn ? (
+          <>
+            <li>
+              <NavLink to="/profile" className="nav-link">
+                {username}
+              </NavLink>
+            </li>
+          </>
+        ) : (
+          <>
+            <li>
+              <NavLink to="/login" className="nav-link">
+                Login
+              </NavLink>
+            </li>
+          </>
+        )}
       </ul>
     </nav>
   );

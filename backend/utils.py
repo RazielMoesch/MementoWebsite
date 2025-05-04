@@ -45,16 +45,29 @@ class Profile:
         cursor = conn.cursor()
 
         try:
+            # Check if username already exists
+            cursor.execute("SELECT COUNT(*) FROM users WHERE username = ?", (username,))
+            if cursor.fetchone()[0] > 0:
+                return False  # Username already taken
+
+            # Check if email already exists
+            cursor.execute("SELECT COUNT(*) FROM users WHERE email = ?", (email,))
+            if cursor.fetchone()[0] > 0:
+                return False  # Email already in use
+
             cursor.execute(
                 "INSERT INTO users (uuid, username, email, hashed_password, known_faces, role) VALUES (?, ?, ?, ?, ?, ?)",
                 (UUID, username, email, hashed, json.dumps(known_faces), role)
             )
             conn.commit()
             return True
-        except sqlite3.IntegrityError:
+        except sqlite3.IntegrityError as e:
+            print(f"IntegrityError: {e}")
             return False
         finally:
             conn.close()
+
+
 
     def login(self, username, password):
         conn = self.get_db()
@@ -64,9 +77,13 @@ class Profile:
         row = cursor.fetchone()
         conn.close()
 
-        if row and self.verify_password(password, row["hashed_password"]):
-            return True
-        return False
+        if not row:
+            print(f"[LOGIN] No user found with username: {username}")
+            return False
+
+        match = self.verify_password(password, row["hashed_password"])
+        print(f"[LOGIN] Password match for {username}: {match}")
+        return match
 
     def get_user_info(self, username):
         conn = self.get_db()
