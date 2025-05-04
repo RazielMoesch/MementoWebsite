@@ -1,0 +1,140 @@
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
+.login-title {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 3.5rem;
+    color: white;
+    letter-spacing: 1px;
+    text-align: center;
+    text-shadow: 0px 0px 10px rgba(0, 150, 255, 0.5);
+    margin-bottom: 20px;
+}
+
+.login-container {
+    margin-top: 30px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: hsl(0, 0%, 10%);
+    border: .5rem;
+    border-radius: 3rem;
+    width: 30vw; /* 30% of screen width */
+    height: 80vh; /* 80% of screen height */
+    min-width: 350px;
+    min-height: 600px;
+    gap: 2rem;
+    box-sizing: border-box;
+    box-shadow: 0px 0px 8px hsl(206, 100%, 50%);
+}
+
+.login-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-buttons {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    gap: 1rem;
+    width: 40%;
+}
+
+.login-container input {
+    padding: 10px;
+    width: 60%;
+    color: hsl(206, 100%, 50%);
+    text-shadow: 0px 0px 8px hsl(206, 100%, 60%);
+    border: 1px solid hsl(206, 100%, 50%);
+    border-radius: .5rem;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #1a1a1a;
+    outline: none;
+}
+
+.login-container button {
+    padding: 5px;
+    background-color: hsl(206, 100%, 40%);
+    box-shadow: 1px 1px 8px hsl(206, 100%, 70%);
+    border: none;
+    border-radius: 0.5rem;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.login-container button:hover {
+    background-color: hsl(206, 100%, 50%);
+}
+
+.switch-login {
+    background-color: hsl(0, 0%, 20%) !important;
+    box-shadow: 1px 1px 8px hsl(0, 0%, 25%) !important;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 5px;
+    font-family: 'Segoe UI', sans-serif;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.switch-login:hover {
+    background-color: hsl(0, 0%, 30%);
+}
+
+
+.error-message {
+    padding: none;
+    color: hsl(0, 100%, 32%);
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.receive-emails-box {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* Reduce the space between checkbox and label */
+    margin-top: 10px; /* Adjust top margin for compactness */
+    padding: 8px;
+    background-color: rgba(0, 0, 0, 0.15); /* Slightly darker background for a subtle effect */
+    border-radius: 0.25rem;
+    box-shadow: 0px 1px 4px rgba(0, 150, 255, 0.3); /* Smaller shadow for a more subtle effect */
+}
+
+.receive-emails-box input[type="checkbox"] {
+    transform: scale(1.1); /* Slightly smaller checkbox size */
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border-radius: 0.25rem;
+    padding: 25px;
+}
+
+
+
+.receive-emails-box p {
+    font-size: .75rem; /* Smaller font size */
+    margin: 0;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: 400; /* Regular font weight for a lighter appearance */
+    transition: color 0.3s ease;
+}
+
+.receive-emails-box:hover p {
+    color: rgba(0, 150, 255, 1); /* Blue text color on hover */
+}
