@@ -14,3 +14,40 @@
     color: white;
     background-color: hsl(203, 100%, 37%);
 }
+
+.webcam-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 1rem;
+    
+}
+
+.webcam-view {
+    width: 100%;
+    max-width: 640px;
+    aspect-ratio: 4 / 3;
+    border: 3px solid hsl(203, 100%, 37%)lue;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); /* Soft blue glow */
+    object-fit: cover;
+    background-color: #0d1117;
+    border-radius: 2rem;
+}
+
+.demo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.recognized-person-overlay {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 5px;
+    font-size: 20px;
+    font-weight: bold;
+}

@@ -1,11 +1,13 @@
 from fastapi import FastAPI, HTTPException, Depends
 import uvicorn
 from pydantic import BaseModel
-from utils import Profile
+from utils import Profile, ImageProcessing
 import uuid
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Any
 
 profile = Profile()
+processor = ImageProcessing()
 app = FastAPI()
 
 # Allow all origins (for development)
@@ -30,13 +32,28 @@ class SignupRequest(BaseModel):
     email: str
     notify: bool  # Change from str to bool
 
-
 class LoginRequest(BaseModel):
     username: str
     password: str
 
 class GetUserInfo(BaseModel):
     username:str
+
+class AddFaceRequest(BaseModel):
+    username: str
+    b64_str: str
+    img_name:str
+
+class RemoveFaceRequest(BaseModel):
+    username:str
+    img_name:str
+
+class GetSavedFacesRequest(BaseModel):
+    username: str
+
+class RecognitionRequest(BaseModel):
+    username: str
+    b64_str: Any
 
 
 # Health check endpoint
@@ -100,6 +117,51 @@ async def get_user_info(data:GetUserInfo):
         print(f"Error during user info retrieval: {e}") 
         return {"worked": False, "message": "Server Error During User Info Retrieval"}
 
+
+@app.post("/recognize")
+async def recognize(data:RecognitionRequest):
+
+    try: 
+
+        names = processor.recognize(data.username,data.b64_str)
+
+        return {"worked":True, "names":names}
+    except:
+        return {"worked":False}
+
+
+@app.post("/addface")
+async def addFace(data:AddFaceRequest):
+    try:
+       
+        results = processor.add_face(data.username, data.img_name, data.b64_str)
+
+        if results:
+            return {"worked":True}
+        
+    except:
+        return {"worked":False}
+        
+@app.post("/removeface")
+async def removeFace(data:RemoveFaceRequest):
+    try:
+        worked = processor.remove_face(data.username, data.img_name)
+
+        if worked:
+            return {"worked":True}
+        return {"worked":False}
+    except:
+        return {"worked": False}
+    
+
+@app.post("/getsavedfaces")
+async def getSavedFaces(data:GetSavedFacesRequest):
+    try:
+        names = processor.get_saved_faces(data.username)
+        return {"worked":True, "names":names}
+
+    except:
+        return {"worked":False}
 
 # Run the app
 if __name__ == "__main__":
