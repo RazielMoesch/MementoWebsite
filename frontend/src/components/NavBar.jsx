@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import "./Navbar.css"; // optional, for styles
+import "./NavBar.css"; // optional, for styles
 
 const NavBar = ({ loggedIn, username }) => {
   return (

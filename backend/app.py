@@ -5,6 +5,7 @@ from utils import Profile, ImageProcessing
 import uuid
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Any
+import time
 
 profile = Profile()
 processor = ImageProcessing()
@@ -122,11 +123,19 @@ async def get_user_info(data:GetUserInfo):
 async def recognize(data:RecognitionRequest):
 
     try: 
+        start_time = time.time()
+        name = processor.recognize(username=data.username, b64_str=data.b64_str)
+        end_time = time.time()
 
-        names = processor.recognize(data.username,data.b64_str)
+        total_time = (end_time-start_time) * 1000
+        print(f"Time For Recognition: {total_time}") 
+        print(data.username)
 
-        return {"worked":True, "names":names}
-    except:
+        print("mame:", name)
+
+        return {"worked":True, "faces":name}
+    except Exception as e:
+        print("Error during rec: ", e)
         return {"worked":False}
 
 

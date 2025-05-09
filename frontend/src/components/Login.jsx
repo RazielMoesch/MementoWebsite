@@ -21,8 +21,8 @@ const Login = ({ setUsername, setIsLoggedIn }) => {
             setErrorMessage("Username must be longer than 4 letters")
             return false
         }
-        if (inputUsername.length > 15) {
-            setErrorMessage("Username cannot be longer than 15 letters.")
+        if (inputUsername.length > 25) {
+            setErrorMessage("Username cannot be longer than 25 letters.")
             return false
         }
 

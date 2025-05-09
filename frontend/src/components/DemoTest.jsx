@@ -10,6 +10,7 @@ const Demo = ({ isLoggedIn, username }) => {
     const [newImgName, setNewImgName] = useState("");
     const [foundPeople, setFoundPeople] = useState([]);
     const [frontCamera, setFrontCamera] = useState(true);
+    const [requestTime, setRequestTime] = useState(null);
     const camRef = useRef(null);
     const canvasRef = useRef(null);
 
@@ -84,10 +85,6 @@ const Demo = ({ isLoggedIn, username }) => {
             if (data.worked) {
                 alert("Face successfully saved");
                 getSavedFaces();
-
-                // Immediately trigger recognition
-                const newCapture = camRef.current?.getScreenshot();
-                if (newCapture) recognize(newCapture);
             } else {
                 alert("Error while saving face. Try again.");
             }
@@ -97,13 +94,26 @@ const Demo = ({ isLoggedIn, username }) => {
         }
     };
 
-    const recognize = async (capturedImage) => {
+    const handleRecognize = async () => {
+        const capturedImage = camRef.current?.getScreenshot();
+        if (!capturedImage) {
+            alert("No image captured. Please try again.");
+            return;
+        }
+
+        setRequestTime(null);
+        const startTime = performance.now();
+        
         try {
             const response = await fetch(`${apilink}recognize`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, b64_str: capturedImage }),
             });
+
+            const endTime = performance.now();
+            const duration = endTime - startTime;
+            setRequestTime(duration);
 
             const data = await response.json();
             if (data.worked) {
@@ -116,15 +126,6 @@ const Demo = ({ isLoggedIn, username }) => {
             setFoundPeople([]);
         }
     };
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            const capturedImage = camRef.current?.getScreenshot();
-            if (capturedImage) recognize(capturedImage);
-        }, 500); 
-
-        return () => clearInterval(interval);
-    }, [foundPeople]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -164,10 +165,8 @@ const Demo = ({ isLoggedIn, username }) => {
                             screenshotFormat="image/jpeg"
                             width={640}
                             height={480}
-                            
                             videoConstraints={{
                                 facingMode: frontCamera ? "user" : { exact: "environment" }
-                                
                             }}
                         />
 
@@ -191,10 +190,19 @@ const Demo = ({ isLoggedIn, username }) => {
                         <button className="add-face-btn" onClick={handleAddFace}>
                             Capture and Add Face
                         </button>
+                        <button onClick={handleRecognize}>
+                            Recognize Faces
+                        </button>
                         <button onClick={() => setFrontCamera(!frontCamera)}>
                             Rotate Camera
                         </button>
                     </div>
+
+                    {requestTime !== null && (
+                        <div className="request-time">
+                            <p>Recognition request took: {requestTime.toFixed(2)} milliseconds</p>
+                        </div>
+                    )}
 
                     <div className="face-manager">
                         <h3>Saved Faces</h3>

@@ -1,53 +1,169 @@
+/* Base layout */
+body {
+    margin-bottom: 2rem;
+    padding: 0;
+    overflow-x: auto;
+    overflow-y: auto;
 
-
-.login-prompt {
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-
-}
-
-.login-prompt button {
-    padding: 1rem;
-    color: white;
-    background-color: hsl(203, 100%, 37%);
-}
-
-.webcam-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    padding: 1rem;
-    
-}
-
-.webcam-view {
-    width: 100%;
-    max-width: 640px;
-    aspect-ratio: 4 / 3;
-    border: 3px solid hsl(203, 100%, 37%)lue;
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); /* Soft blue glow */
-    object-fit: cover;
-    background-color: #0d1117;
-    border-radius: 2rem;
 }
 
 .demo-container {
+    
+    background-color: #0a0a0a;
+    color: #d0e7ff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
-    justify-content: center;
-    align-items: center;
     flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    /* Ensure it's below the navbar */
+    min-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    overflow-x: auto;
+    gap: 1rem;
+    margin-top: 4rem; 
 }
+
+/* Webcam section */
+.webcam-container {
+    position: relative;
+    width: 640px;
+    aspect-ratio: 4 / 3;
+    border-radius: 12px;
+    overflow-x: auto;
+    overflow-y: auto;
+    box-shadow: 0 0 20px rgba(0, 150, 255, 0.4);
+    margin-bottom: 1rem;
+    margin-top: 20rem;
+}
+
+.webcam-view,
+.canvas-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    object-fit: cover;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.canvas-overlay {
+    pointer-events: none;
+}
+
+/* Face overlay names */
 .recognized-person-overlay {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.5);
-    padding: 5px;
-    font-size: 20px;
+    top: 0;
+    left: 0;
+    padding: 10px;
+    color: #00ccff;
     font-weight: bold;
+    font-size: 18px;
+    text-shadow: 1px 1px 3px #000;
+}
+
+/* Button style */
+.add-face-btn {
+    background-color: #0066ff;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-top: 1rem;
+}
+
+.add-face-btn:hover {
+    background-color: #0051cc;
+}
+
+/* Saved faces section */
+.face-manager {
+    background-color: #121212;
+    border: 1px solid #1e90ff44;
+    border-radius: 10px;
+    padding: 1rem;
+    width: 640px;
+    margin-top: 1rem;
+    box-shadow: 0 0 10px rgba(30, 144, 255, 0.3);
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.known-face {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.known-face button {
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.known-face button:hover {
+    background-color: #cc0000;
+}
+
+/* Recognized faces list */
+.recognized-faces {
+    margin-top: 1rem;
+    width: 640px;
+    background-color: #121212;
+    border: 1px solid #1e90ff44;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 0 10px rgba(0, 140, 255, 0.25);
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.recognized-faces p {
+    margin: 4px 0;
+    font-size: 15px;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+/* Login prompt styling */
+.login-prompt {
+    margin-top: 5rem;
+    color: white;
+    text-align: center;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.login-prompt button {
+    background-color: #0084ff;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: background 0.3s ease;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.login-prompt button:hover {
+    background-color: #006ed6;
 }

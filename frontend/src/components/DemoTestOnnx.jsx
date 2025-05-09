@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import Webcam from 'react-webcam';
 import "./Demo.css";
 import { useState, useEffect, useRef } from "react";
+import * as ort from "onnxruntime-web";
 
 const Demo = ({ isLoggedIn, username }) => {
     const [knownFaces, setKnownFaces] = useState([]);
@@ -10,17 +11,30 @@ const Demo = ({ isLoggedIn, username }) => {
     const [newImgName, setNewImgName] = useState("");
     const [foundPeople, setFoundPeople] = useState([]);
     const [frontCamera, setFrontCamera] = useState(true);
+    const [requestTime, setRequestTime] = useState(null);
+    const [onnxSession, setOnnxSession] = useState(null);
     const camRef = useRef(null);
     const canvasRef = useRef(null);
 
     const apilink = "http://localhost:5001/";
+    const modelPath = ""; 
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (isLoggedIn) {
-            getSavedFaces();
-        }
+        if (isLoggedIn) getSavedFaces();
     }, [isLoggedIn]);
+
+    useEffect(() => {
+        const loadOnnxModel = async () => {
+            try {
+                const session = await ort.InferenceSession.create(modelPath);
+                setOnnxSession(session);
+            } catch (e) {
+                console.error("Failed to load ONNX model:", e);
+            }
+        };
+        loadOnnxModel();
+    }, []);
 
     const getSavedFaces = async () => {
         setLoading(true);
@@ -31,9 +45,7 @@ const Demo = ({ isLoggedIn, username }) => {
                 body: JSON.stringify({ username }),
             });
             const data = await response.json();
-            if (data.worked) {
-                setKnownFaces(data.names);
-            }
+            if (data.worked) setKnownFaces(data.names);
         } catch (error) {
             console.error("Error fetching saved faces:", error);
         } finally {
@@ -49,9 +61,7 @@ const Demo = ({ isLoggedIn, username }) => {
                 body: JSON.stringify({ username, img_name: name }),
             });
             const data = await response.json();
-            if (data.worked) {
-                setKnownFaces(knownFaces.filter(face => face !== name));
-            }
+            if (data.worked) setKnownFaces(knownFaces.filter(face => face !== name));
         } catch (error) {
             console.error("Error removing face:", error);
         }
@@ -60,7 +70,7 @@ const Demo = ({ isLoggedIn, username }) => {
     const handleAddFace = async () => {
         const capturedImage = camRef.current.getScreenshot();
         if (!capturedImage) {
-            alert("Failed to capture image, please try again.");
+            alert("Failed to capture image.");
             return;
         }
 
@@ -84,47 +94,66 @@ const Demo = ({ isLoggedIn, username }) => {
             if (data.worked) {
                 alert("Face successfully saved");
                 getSavedFaces();
-
-                // Immediately trigger recognition
-                const newCapture = camRef.current?.getScreenshot();
-                if (newCapture) recognize(newCapture);
             } else {
-                alert("Error while saving face. Try again.");
+                alert("Error while saving face.");
             }
         } catch (error) {
-            alert("Error while saving face. Try again.");
+            alert("Error while saving face.");
             console.error(error);
         }
     };
 
-    const recognize = async (capturedImage) => {
-        try {
-            const response = await fetch(`${apilink}recognize`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, b64_str: capturedImage }),
-            });
+    const handleRecognize = async () => {
+        const capturedImage = camRef.current?.getScreenshot();
+        if (!capturedImage) {
+            alert("No image captured.");
+            return;
+        }
 
-            const data = await response.json();
-            if (data.worked) {
-                setFoundPeople(data.faces);
-            } else {
-                setFoundPeople([]);
-            }
-        } catch (error) {
-            console.error("Error recognizing face:", error);
-            setFoundPeople([]);
+        setRequestTime(null);
+        const startTime = performance.now();
+
+        try {
+            const imageTensor = await preprocessImage(capturedImage, 256, 256);
+            const feeds = { input: imageTensor };
+            const results = await onnxSession.run(feeds);
+
+            const endTime = performance.now();
+            setRequestTime(endTime - startTime);
+
+            console.log("ONNX Inference Output:", results);
+
+        } catch (e) {
+            console.error("ONNX inference failed:", e);
         }
     };
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            const capturedImage = camRef.current?.getScreenshot();
-            if (capturedImage) recognize(capturedImage);
-        }, 500); 
+    const preprocessImage = async (base64Img, width, height) => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+                const imageData = ctx.getImageData(0, 0, width, height);
+                const { data } = imageData;
 
-        return () => clearInterval(interval);
-    }, [foundPeople]);
+                const float32Data = new Float32Array(3 * width * height);
+                for (let i = 0; i < width * height; i++) {
+                    float32Data[i] = data[i * 4] / 255;
+                    float32Data[i + width * height] = data[i * 4 + 1] / 255;
+                    float32Data[i + 2 * width * height] = data[i * 4 + 2] / 255;
+                }
+
+                const inputTensor = new ort.Tensor("float32", float32Data, [1, 3, height, width]);
+                resolve(inputTensor);
+            };
+            img.src = base64Img;
+        });
+    };
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -164,20 +193,11 @@ const Demo = ({ isLoggedIn, username }) => {
                             screenshotFormat="image/jpeg"
                             width={640}
                             height={480}
-                            
                             videoConstraints={{
                                 facingMode: frontCamera ? "user" : { exact: "environment" }
-                                
                             }}
                         />
-
-                        <canvas
-                            ref={canvasRef}
-                            width={640}
-                            height={480}
-                            className="canvas-overlay"
-                        />
-
+                        <canvas ref={canvasRef} width={640} height={480} className="canvas-overlay" />
                         {foundPeople.length > 0 && (
                             <div className="recognized-person-overlay">
                                 {foundPeople.map((person, index) => (
@@ -188,13 +208,16 @@ const Demo = ({ isLoggedIn, username }) => {
                     </div>
 
                     <div className="camera-buttons">
-                        <button className="add-face-btn" onClick={handleAddFace}>
-                            Capture and Add Face
-                        </button>
-                        <button onClick={() => setFrontCamera(!frontCamera)}>
-                            Rotate Camera
-                        </button>
+                        <button className="add-face-btn" onClick={handleAddFace}>Capture and Add Face</button>
+                        <button onClick={handleRecognize}>Run ONNX Inference</button>
+                        <button onClick={() => setFrontCamera(!frontCamera)}>Rotate Camera</button>
                     </div>
+
+                    {requestTime !== null && (
+                        <div className="request-time">
+                            <p>ONNX inference took: {requestTime.toFixed(2)} ms</p>
+                        </div>
+                    )}
 
                     <div className="face-manager">
                         <h3>Saved Faces</h3>
@@ -216,9 +239,7 @@ const Demo = ({ isLoggedIn, username }) => {
                         <h3>Recognized Faces:</h3>
                         {foundPeople.length > 0 ? (
                             foundPeople.map((person, index) => (
-                                <p key={index}>
-                                    {person.name} - Location: [{person.location.join(", ")}]
-                                </p>
+                                <p key={index}>{person.name} - Location: [{person.location.join(", ")}]</p>
                             ))
                         ) : (
                             <p>No face recognized yet.</p>
