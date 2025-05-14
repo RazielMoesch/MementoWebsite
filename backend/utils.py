@@ -164,27 +164,42 @@ class ImageProcessing:
 
     def add_face(self, username, face_name, base64_img):
         try:
+            # 1) Decode incoming base64 to NumPy RGB image
             np_img = self.b64_to_np(base64_img)
             if np_img is None:
                 return False
-                
+
+            # 2) Run face detection
             faces = self._detect_faces(np_img)
             if len(faces) != 1:
                 return False
-                
-            face = faces[0]['face']
+
+            # 3) Extract the single face’s bounding box from 'facial_area'
+            face_data = faces[0]
+            area = face_data.get('facial_area')
+            if not area:
+                return False
+            x, y, w, h = area['x'], area['y'], area['w'], area['h']
+
+            # 4) Crop the original image to that box
+            face = np_img[y:y+h, x:x+w]
+
+            # 5) Generate embedding from the cropped face patch
             embedding = self._get_embedding(face)
-            
+
+            # 6) Persist both image and embedding
             user_dir = os.path.join("UserImages", username, "userimages")
             os.makedirs(user_dir, exist_ok=True)
-            
-            # Save both image and embedding
             Image.fromarray(face).save(os.path.join(user_dir, f"{face_name}.jpg"))
             np.save(os.path.join(user_dir, f"{face_name}.npy"), embedding)
+
             return True
+
         except Exception as e:
             print(f"Error in add_face: {e}")
             return False
+
+
 
     def remove_face(self, username, face_name):
         try:
